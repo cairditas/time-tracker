@@ -59,16 +59,45 @@ class TimerScreen(BaseScreen):
         # Configure the frame
         self.configure(bg=BLACK)  # Dark mode background
 
+        # Start and stop buttons frame
+        top_button_frame = tk.Frame(self, bg=BLACK)
+        top_button_frame.grid(row=0, column=0, sticky="nsew")
+        top_button_frame.grid_columnconfigure(0, weight=1)
+
+        # Start and stop buttons frame
+        bottom_button_frame = tk.Frame(self, bg=BLACK)
+        bottom_button_frame.grid(row=2, column=0, sticky="nsew")
+        bottom_button_frame.grid_columnconfigure(0, weight=1)
+
+        # Create a centering container for the top buttons
+        top_center_frame = tk.Frame(top_button_frame, bg=BLACK)
+        top_center_frame.pack(expand=True)
+
+        # Create a centering container for the bottom buttons
+        bottom_center_frame = tk.Frame(bottom_button_frame, bg=BLACK)
+        bottom_center_frame.pack(expand=True)
+
         # Previous day totals button
         self.totals_button = tk.Button(
-            self,
+            top_center_frame,
             text="Previous Day Totals",
             command=self.show_totals,
             bg=GREY,
             fg=BLACK,
             font=("Arial", 12),
         )
-        self.totals_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+        self.totals_button.pack(side=tk.LEFT, padx=10, pady=10)
+
+        # Exit button
+        self.exit_button = tk.Button(
+            top_center_frame,
+            text="Exit",
+            command=self.exit_app,
+            bg=GREY,
+            fg=BLACK,
+            font=("Arial", 12),
+        )
+        self.exit_button.pack(side=tk.LEFT, padx=10, pady=10)
 
         # Large cyan timer display
         self.timer_label = tk.Label(
@@ -76,16 +105,8 @@ class TimerScreen(BaseScreen):
         )
         self.timer_label.grid(row=1, column=0, sticky="nsew")
 
-        # Start and Stop buttons
-        button_frame = tk.Frame(self, bg=BLACK)
-        button_frame.grid(row=2, column=0, sticky="nsew")
-
-        # Create a centering container for the buttons
-        center_frame = tk.Frame(button_frame, bg=BLACK)
-        center_frame.pack(expand=True)
-
         self.start_button = tk.Button(
-            center_frame,
+            bottom_center_frame,
             text="Start",
             command=self.start_timer,
             fg=BLACK,
@@ -95,7 +116,7 @@ class TimerScreen(BaseScreen):
         self.start_button.pack(side=tk.LEFT, padx=10, pady=10)
 
         self.stop_button = tk.Button(
-            center_frame,
+            bottom_center_frame,
             text="Stop",
             command=self.stop_timer,
             fg=BLACK,
@@ -118,7 +139,7 @@ class TimerScreen(BaseScreen):
         Updates the timer display every second.
         """
         self.timer_label.config(text=self.timer.get_current_time())
-        self.after(1000, self.update_timer)
+        self.after(10, self.update_timer)
 
     def start_timer(self) -> None:
         """
@@ -138,6 +159,20 @@ class TimerScreen(BaseScreen):
                 self.timer.stop_time,
                 self.timer.stop_time - self.timer.start_time,
             )
+
+    def exit_app(self) -> None:
+        """
+        Stops the timer and closes the application.
+        """
+        if self.timer.is_running:
+            self.timer.stop()
+            # Log the entry if timer was running
+            self.logger.append_entry(
+                self.timer.start_time,
+                self.timer.stop_time,
+                self.timer.stop_time - self.timer.start_time,
+            )
+        self.master.quit()
 
     def show_totals(self) -> None:
         """
